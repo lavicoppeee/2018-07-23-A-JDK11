@@ -1,6 +1,6 @@
 package it.polito.tdp.newufosightings.model;
 
-public class State {
+public class State implements Comparable<State> {
 	private String id;
 	private String name;
 	private String capital;
@@ -89,7 +89,7 @@ public class State {
 
 	@Override
 	public String toString() {
-		return name;
+		return id+" "+name;
 	}
 
 	@Override
@@ -115,6 +115,11 @@ public class State {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	@Override
+	public int compareTo(State o) {
+		return this.id.compareTo(o.id);
 	}
 
 }

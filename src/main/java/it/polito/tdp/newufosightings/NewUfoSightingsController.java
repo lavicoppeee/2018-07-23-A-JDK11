@@ -5,9 +5,12 @@
 package it.polito.tdp.newufosightings;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.newufosightings.model.Model;
+import it.polito.tdp.newufosightings.model.State;
+import it.polito.tdp.newufosightings.model.StateDefcon;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -18,6 +21,8 @@ import javafx.scene.control.TextField;
 public class NewUfoSightingsController {
 
 	private Model model;
+	private Integer year = null;
+	private String shape = null;
 	
 	@FXML // ResourceBundle that was given to the FXMLLoader
 	private ResourceBundle resources;
@@ -51,17 +56,70 @@ public class NewUfoSightingsController {
 
 	@FXML
 	void doCreaGrafo(ActionEvent event) {
-
+		txtResult.clear();
+		this.shape = cmbBoxForma.getValue();
+		if(shape == null) {
+			txtResult.appendText("Selezionare una forma!");
+			return;
+		}
+		
+		List<State> states = this.model.buildGraph(this.year, shape);
+		for(State s : states) {
+			txtResult.appendText(s.toString()+" | "+this.model.getPesoAdiacenti(s)+"\n");
+		}
 	}
 
 	@FXML
 	void doSelezionaAnno(ActionEvent event) {
-
+		txtResult.clear();
+		this.year = null;
+		try {
+			this.year = Integer.parseInt(txtAnno.getText());
+		} catch(NumberFormatException e) {
+			txtResult.appendText("Inserire un valore numerico!");
+			return;
+		}
+		
+		if(this.year < 1910 || this.year > 2014) {
+			txtResult.appendText("Inserire un anno compreso tra 1910 e 2014!");
+			return;
+		}
+		
+		cmbBoxForma.getItems().setAll(this.model.getShapeYear(this.year));
 	}
 
 	@FXML
 	void doSimula(ActionEvent event) {
-
+		txtResult.clear();
+		Integer T = null;
+		try {
+			T = Integer.parseInt(txtT1.getText());
+		} catch(NumberFormatException e) {
+			txtResult.appendText("Inserire un valore numerico!");
+			return;
+		}
+		if(T < 1 || T >= 365) {
+			txtResult.appendText("Inserire un numero di giorni compreso tra 1 e 364!");
+			return;
+		}
+		
+		Integer alfa = null;
+		try {
+			alfa = Integer.parseInt(txtAlfa.getText());
+		} catch(NumberFormatException e) {
+			txtResult.appendText("Inserire un valore numerico!");
+			return;
+		}
+		if(alfa < 0 || alfa > 100) {
+			txtResult.appendText("Inserire una probabilità compresa tra 0 e 100!");
+			return;
+		}
+		
+		this.model.simula(this.year, shape, T, alfa);
+		List<StateDefcon> list = this.model.getStateDefcon();
+		for(StateDefcon sd : list) {
+			txtResult.appendText(sd.toString()+"\n");
+		}
 	}
 
 	@FXML // This method is called by the FXMLLoader when initialization is complete
