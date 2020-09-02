@@ -5,9 +5,12 @@
 package it.polito.tdp.newufosightings;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.newufosightings.model.Defcon;
 import it.polito.tdp.newufosightings.model.Model;
+import it.polito.tdp.newufosightings.model.StatePeso;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -51,17 +54,98 @@ public class NewUfoSightingsController {
 
 	@FXML
 	void doCreaGrafo(ActionEvent event) {
-
+		this.txtResult.clear();
+        Integer anno=Integer.parseInt(this.txtAnno.getText());
+    	
+    	String shape=this.cmbBoxForma.getValue();
+    	
+    	if(shape==null) {
+    		txtResult.setText("Devi inserire una shape");
+    		return ;
+    	}
+    	
+    	model.creaGrafo(anno, shape);
+    
+    	txtResult.appendText("Grafo Creato!\n");
+     	txtResult.appendText("# Vertici: " + model.nVertici()+ "\n");
+     	txtResult.appendText("# Archi: " + model.nArchi() + "\n");
+     	
+     	List<StatePeso> sp=this.model.getState();
+     	for(StatePeso s:sp) {
+     		txtResult.appendText( s.toString()+"\n");
+     	}
+     	
 	}
 
 	@FXML
 	void doSelezionaAnno(ActionEvent event) {
-
+		this.txtResult.clear();
+    	this.cmbBoxForma.getItems().clear();
+    	
+    	//prendi l'anno 
+    	String mTemp=this.txtAnno.getText();
+        Integer anno;
+    	
+    	try {
+    		anno=Integer.parseInt(mTemp);
+    	}catch(NumberFormatException e) {
+    		
+    		txtResult.setText("Devi inserire solo numeri");
+    		return ;
+    	}
+    	
+    	if(anno>2014 || anno<1910) {
+    		txtResult.setText("Devi inserire solo numeri tra 1910 e 2014");
+    	}
+    	this.cmbBoxForma.getItems().addAll(model.getShape(anno));
 	}
 
 	@FXML
 	void doSimula(ActionEvent event) {
-
+		
+		txtResult.clear();
+		Integer T = null;
+		try {
+			T = Integer.parseInt(txtT1.getText());
+		} catch(NumberFormatException e) {
+			txtResult.appendText("Inserire un valore numerico!");
+			return;
+		}
+		//tra 1 e 365
+		if(T < 1 || T >= 365) {
+			txtResult.appendText("Inserire un numero di giorni compreso tra 1 e 364!");
+			return;
+		}
+		
+		Integer alfa = null;
+		try {
+			alfa = Integer.parseInt(txtAlfa.getText());
+		} catch(NumberFormatException e) {
+			txtResult.appendText("Inserire un valore numerico!");
+			return;
+		}
+		//tra 0 e 100
+		if(alfa < 0 || alfa > 100) {
+			txtResult.appendText("Inserire una probabilità compresa tra 0 e 100!");
+			return;
+		}
+		
+        Integer anno=Integer.parseInt(this.txtAnno.getText());
+    	
+    	String shape=this.cmbBoxForma.getValue();
+    	
+    	if(shape==null) {
+    		txtResult.setText("Devi inserire una shape");
+    		return ;
+    	}
+    	
+		//simual e stampa
+		this.model.simula(anno, shape, T, alfa);
+		List<Defcon> list = this.model.getDefcon();
+				
+		for(Defcon sd : list) {
+			txtResult.appendText(sd.toString()+"\n");
+		}
 	}
 
 	@FXML // This method is called by the FXMLLoader when initialization is complete
